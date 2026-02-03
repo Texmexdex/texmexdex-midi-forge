@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeXmExDeX Type Midi Forge</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/midi-writer-js@2.1.4/build/index.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>TeXmExDeX Type Midi Forge</h1>
+            </div>
+            <div class="header-center">
+                <button id="btn-play" class="btn btn-primary">▶ Play</button>
+                <button id="btn-stop" class="btn">⏹ Stop</button>
+                <div class="bpm-control">
+                    <label>BPM:</label>
+                    <input type="number" id="input-bpm" value="120" min="20" max="300">
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="btn-export-midi" class="btn btn-success">Export MIDI</button>
+                <button id="btn-export-audio" class="btn btn-success">Export Audio</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="section">
+                    <h3>Tracks</h3>
+                    <div id="track-list" class="track-list"></div>
+                    <div class="track-controls">
+                        <button id="btn-add-track" class="btn btn-small">+ Add Track</button>
+                        <button id="btn-remove-track" class="btn btn-small">- Remove</button>
+                    </div>
+                </div>
+
+                <div class="section" id="track-settings">
+                    <h3>Track Settings</h3>
+                    <div class="form-group">
+                        <label>Instrument:</label>
+                        <select id="select-instrument" class="form-control">
+                            <option value="acoustic_grand_piano">Acoustic Grand Piano</option>
+                            <option value="electric_guitar_clean">Electric Guitar (Clean)</option>
+                            <option value="acoustic_bass">Acoustic Bass</option>
+                            <option value="violin">Violin</option>
+                            <option value="flute">Flute</option>
+                            <option value="synth_drum">Synth Drum</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Volume:</label>
+                        <input type="range" id="slider-volume" min="0" max="100" value="80" class="slider">
+                        <span id="volume-value">80</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Pan:</label>
+                        <input type="range" id="slider-pan" min="-50" max="50" value="0" class="slider">
+                        <span id="pan-value">Center</span>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="check-mute"> Mute
+                        </label>
+                        <label>
+                            <input type="checkbox" id="check-solo"> Solo
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center: Piano Roll + Chatbot -->
+            <main class="main-content">
+                <!-- Piano Roll -->
+                <div class="piano-roll-container">
+                    <div class="toolbar">
+                        <button id="btn-select-all" class="btn btn-tool" title="Select All">All</button>
+                        <button id="btn-duplicate" class="btn btn-tool" title="Duplicate">Dup</button>
+                        <button id="btn-delete" class="btn btn-tool" title="Delete">Del</button>
+                        <span class="separator">|</span>
+                        <button id="btn-transpose-up" class="btn btn-tool" title="Transpose Up">+1</button>
+                        <button id="btn-transpose-down" class="btn btn-tool" title="Transpose Down">-1</button>
+                        <span class="separator">|</span>
+                        <button id="btn-quantize" class="btn btn-tool" title="Quantize">Quant</button>
+                        <button id="btn-humanize" class="btn btn-tool" title="Humanize">Human</button>
+                        <span class="separator">|</span>
+                        <button id="btn-import-midi" class="btn btn-tool">Import MIDI</button>
+                        <input type="file" id="file-import-midi" accept=".mid,.midi" style="display:none">
+                    </div>
+                    <div class="piano-roll-wrapper">
+                        <canvas id="piano-roll" width="1200" height="600"></canvas>
+                    </div>
+                </div>
+
+                <!-- AI Chatbot -->
+                <div class="chatbot-container">
+                    <div class="chatbot-header">
+                        <h3>🤖 AI Music Assistant</h3>
+                        <button id="btn-clear-chat" class="btn btn-small">Clear</button>
+                    </div>
+                    <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input" placeholder="Ask me to generate music... (e.g., 'Create a C major scale')" class="chat-input">
+                        <button id="btn-send-chat" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="status-bar">
+            <span id="status-text">Ready</span>
+            <span id="playback-position">0.0 / 0.0</span>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

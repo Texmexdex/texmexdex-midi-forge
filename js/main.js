@@ -31,7 +31,15 @@ class MidiForge {
         // Initialize audio engine
         await this.audioEngine.init();
         
-        this.updateStatus('Ready - Click to add notes (Shift+Click)');
+        // Add click handler to enable audio context
+        document.body.addEventListener('click', async () => {
+            if (Tone.context.state !== 'running') {
+                await Tone.context.resume();
+                console.log('Audio context resumed');
+            }
+        }, { once: true });
+        
+        this.updateStatus('Ready - Click anywhere to enable audio, then Shift+Click to add notes');
     }
     
     setupEventListeners() {

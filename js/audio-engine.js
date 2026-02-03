@@ -30,8 +30,9 @@ export class AudioEngine {
             const ac = Tone.context.rawContext;
             const instrument = await Soundfont.instrument(ac, instrumentName, {
                 soundfont: 'MusyngKite',
+                format: 'mp3',
                 nameToUrl: (name, soundfont, format) => {
-                    return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                    return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-mp3.js`;
                 }
             });
             
@@ -39,12 +40,17 @@ export class AudioEngine {
             console.log(`Loaded instrument: ${instrumentName} for track ${trackId}`);
         } catch (error) {
             console.error(`Failed to load instrument ${instrumentName}:`, error);
-            // Fallback to synth
+            // Fallback to Tone.js synth
             const synth = new Tone.PolySynth(Tone.Synth).toDestination();
             this.instruments.set(trackId, { 
-                play: (note, time, duration, velocity) => {
+                play: (note, time, options) => {
                     const freq = Tone.Frequency(note, 'midi').toFrequency();
-                    synth.triggerAttackRelease(freq, duration, time, velocity / 127);
+                    const duration = options.duration || 1;
+                    const velocity = (options.gain || 1);
+                    synth.triggerAttackRelease(freq, duration, time, velocity);
+                },
+                stop: () => {
+                    synth.releaseAll();
                 }
             });
         }
@@ -94,14 +100,16 @@ export class AudioEngine {
             
             if (instrument.play) {
                 // Soundfont instrument
-                instrument.play(pitch, Tone.now(), { 
+                const when = Tone.now();
+                instrument.play(pitch, when, { 
                     duration: duration,
                     gain: adjustedVelocity 
                 });
             } else if (instrument.triggerAttackRelease) {
                 // Tone.js synth
                 const freq = Tone.Frequency(pitch, 'midi').toFrequency();
-                instrument.triggerAttackRelease(freq, duration, Tone.now(), adjustedVelocity);
+                const when = Tone.now();
+                instrument.triggerAttackRelease(freq, duration, when, adjustedVelocity);
             }
         } catch (error) {
             console.error('Error playing note:', error);

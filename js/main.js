@@ -186,8 +186,14 @@ class MidiForge {
         track.instrument = instrument;
         
         // Reload the instrument
-        await this.audioEngine.loadInstrument(track.id, instrument);
-        this.updateStatus(`Changed instrument to ${instrument}`);
+        this.updateStatus(`Loading ${instrument}...`);
+        const success = await this.audioEngine.loadInstrument(track.id, instrument);
+        
+        if (success) {
+            this.updateStatus(`Changed instrument to ${instrument}`);
+        } else {
+            this.updateStatus(`Using fallback synth (${instrument} not available)`);
+        }
     }
     
     updateTrackVolume(volume) {

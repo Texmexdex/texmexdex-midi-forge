@@ -43,10 +43,20 @@ export class AudioEngine {
             
             this.instruments.set(trackId, instrument);
             console.log(`Loaded instrument: ${instrumentName} for track ${trackId}`);
+            return true;
         } catch (error) {
             console.error(`Failed to load instrument ${instrumentName}:`, error);
-            // Fallback to Tone.js synth
-            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            // Fallback to Tone.js synth with better configuration
+            const synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: 'triangle' },
+                envelope: {
+                    attack: 0.005,
+                    decay: 0.1,
+                    sustain: 0.3,
+                    release: 1
+                }
+            }).toDestination();
+            
             this.instruments.set(trackId, { 
                 play: (note, time, options) => {
                     const freq = Tone.Frequency(note, 'midi').toFrequency();
@@ -56,8 +66,10 @@ export class AudioEngine {
                 },
                 stop: () => {
                     synth.releaseAll();
-                }
+                },
+                isFallback: true
             });
+            return false;
         }
     }
     
@@ -102,19 +114,24 @@ export class AudioEngine {
     playNote(instrument, pitch, duration, velocity, volume = 1, pan = 0) {
         try {
             const adjustedVelocity = (velocity / 127) * volume;
+            const now = Tone.now();
             
-            if (instrument.play) {
-                // Soundfont instrument
-                const when = Tone.now();
-                instrument.play(pitch, when, { 
+            if (instrument.play && !instrument.isFallback) {
+                // Soundfont instrument - use its native play method
+                instrument.play(pitch, now, { 
+                    duration: duration,
+                    gain: adjustedVelocity 
+                });
+            } else if (instrument.play && instrument.isFallback) {
+                // Fallback synth with custom play method
+                instrument.play(pitch, now, { 
                     duration: duration,
                     gain: adjustedVelocity 
                 });
             } else if (instrument.triggerAttackRelease) {
-                // Tone.js synth
+                // Direct Tone.js synth
                 const freq = Tone.Frequency(pitch, 'midi').toFrequency();
-                const when = Tone.now();
-                instrument.triggerAttackRelease(freq, duration, when, adjustedVelocity);
+                instrument.triggerAttackRelease(freq, duration, now, adjustedVelocity);
             }
         } catch (error) {
             console.error('Error playing note:', error);

@@ -21,8 +21,13 @@ export class AudioEngine {
     }
     
     async loadInstrument(trackId, instrumentName) {
+        // Remove old instrument if exists
         if (this.instruments.has(trackId)) {
-            return; // Already loaded
+            const oldInstrument = this.instruments.get(trackId);
+            if (oldInstrument.stop) {
+                oldInstrument.stop();
+            }
+            this.instruments.delete(trackId);
         }
         
         try {

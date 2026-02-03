@@ -184,7 +184,10 @@ class MidiForge {
     async updateTrackInstrument(instrument) {
         const track = this.getCurrentTrack();
         track.instrument = instrument;
+        
+        // Reload the instrument
         await this.audioEngine.loadInstrument(track.id, instrument);
+        this.updateStatus(`Changed instrument to ${instrument}`);
     }
     
     updateTrackVolume(volume) {
